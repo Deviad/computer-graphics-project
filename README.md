@@ -2,11 +2,11 @@
 
 ## Instructiunile
 
-1) Descaricati codul fie prin utilitate **git** sau prin buton de download: Code->Download ZIP
-2) Rulati:
-    - npm install
-    - npm start
-    
+Resursele sunt plasate pe retele de livrare a continutilor (CDN) si textura este plasata pe Imgur.
+In consecinta pentru a rula proiectul este suficient sa deschideti fiser-ul index.html cu browser-ul dvs.
+
+
+
 
 
 

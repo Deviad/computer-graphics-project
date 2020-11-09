@@ -1,9 +1,6 @@
-import THREE from "three.js";
-import dat from "dat.gui";
-import { animationFrameScheduler, interval, timer } from "rxjs";
-import { takeUntil, tap } from "rxjs/operators";
+const {animationFrameScheduler, interval, timer} = rxjs;
+const {takeUntil, tap} = rxjs.operators;
 
-import marble from './images/marble.jpg';
 
 // scalar to simulate speed
 let speed = 0.05;
@@ -95,7 +92,7 @@ function initState() {
             new THREE.BoxGeometry(6, 6, 6),
             new THREE.MeshLambertMaterial({
                 color: 0xbdbdbd,
-                map: new THREE.TextureLoader().load(marble),
+                map: new THREE.TextureLoader().load("https://i.imgur.com/czwKR1q.jpg"),
             })
         ),
 
@@ -282,7 +279,7 @@ function init() {
                 determină câte mape de textură putem utiliza simultan într-un shader.
                 Coordonatele de textura se afla in intervalul 0 si 1.
             */
-            map: new THREE.TextureLoader().load(marble)
+            map: new THREE.TextureLoader().load("https://i.imgur.com/czwKR1q.jpg"),
         });
         const sphere = new THREE.Mesh(geometry, material);
         sphere.position.y = 8;
@@ -491,7 +488,7 @@ function move() {
 
     interval(0, animationFrameScheduler)
         .pipe(
-            takeUntil(timer(700)),
+            takeUntil(timer(3000)),
             tap(y => {
                 console.log("y is:", y);
                 for (const s of spheres) {
