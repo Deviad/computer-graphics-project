@@ -29,11 +29,37 @@ function initState() {
 			opacity: 1,
 			color: 0x086113
 		},
-	}
+		raycaster: new THREE.Raycaster(),
+		selected: undefined,
+		mouse: new THREE.Vector2(),
+}
 }
 
 const state = initState();
-const {scene, camera, renderer, plane, cube, ambient, light, clock, control} = state;
+const {scene, camera, renderer, plane, cube, ambient, light, clock, control, selected, raycaster, mouse} = state;
+
+
+function onWindowResize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+function onDocumentMouseMove( event ) {
+	event.preventDefault();
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+}
+
+function onDocumentMouseDown( event ) {
+	event.preventDefault();
+	if ( selected ){
+		selected.currentHex = 0x00ff00*Math.random();
+		selected.material.emissive.setHex( selected.currentHex );
+	}
+}
+
+
 
 function buildRenderer() {
 	renderer.setClearColor(0x000000, 1.0);
@@ -84,11 +110,17 @@ function init() {
 	scene.add(ambient);
 	scene.add(light);
 
-	addControlGui(control);
+	// addControlGui(control);
 
-	document.getElementById("app").appendChild(renderer.domElement);
+	const container = document.getElementById("app");
+	container.appendChild(renderer.domElement);
+	const resizeHOF = ({camera, renderer}) => (event) => handleResize({camera, renderer});
+	window.addEventListener("resize", resizeHOF({camera, renderer}), false);
+	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+	container.addEventListener( 'mousedown', onDocumentMouseDown, false );
+	window.addEventListener( 'resize', onWindowResize, false );
 
-	render({scene, renderer, camera});
+	render({scene, renderer, camera, raycaster, selected, mouse});
 }
 
 function addControlGui(controlObject) {
@@ -108,7 +140,7 @@ function updateCamera(camera, rotSpeed, scene) {
 	camera.lookAt(scene.position);
 }
 
-function render({scene, renderer, camera}) {
+function render({scene, renderer, camera, raycaster, selected, mouse}) {
 	const delta = clock.getDelta();
 	// alert(`${delta}, ${control.rotationSpeed}`); // e ceva aleatoriu ca si Math.random
 	const rotSpeed = Math.floor(Math.random() * 10)/100 * control.rotationSpeed;
@@ -117,8 +149,39 @@ function render({scene, renderer, camera}) {
 	scene.getObjectByName("cube").material.opacity = control.opacity;
 	scene.getObjectByName("cube").material.color = new THREE.Color(control.color);
 
-	requestAnimationFrame(() => render({scene, renderer, camera}));
-	renderer.render(scene, camera);
+	requestAnimationFrame(() => render({scene, renderer, camera, raycaster, selected, mouse}));
+
+	raycaster.setFromCamera( mouse, camera );
+
+	// raycaster "translate" the x,y coordinates on the place surface of the mouse into 3D coordinates (x,y,z),
+	// taking into account those that are the visible objects on the scene. It excludes the hidden portions of objects.
+
+	var intersects = raycaster.intersectObjects( scene.children );
+	const container = document.getElementById("app");
+	// console.log("SELECTED IS ", selected);
+	if ( intersects.length > 0 ) {
+		if ( selected !== intersects[ 0 ].object ) {
+			if ( selected ) selected.material.emissive.setHex( selected.currentHex );
+			selected = intersects[ 0 ].object;
+			console.log("MOUSE IS", mouse);
+			// if(selected.name === "cube") {
+			// 	alert("CUBEEEE");
+			// }
+
+			selected.currentHex = selected.material.emissive.getHex();
+			selected.material.emissive.setHex( 0xff0000 );
+			container.style.cursor = 'pointer';
+		}
+
+	} else {
+		if ( selected ) {
+			selected.material.emissive.setHex( selected.currentHex );
+			selected = null;
+			container.style.cursor = 'auto';
+		}
+	}
+
+	renderer.render( scene, camera );
 }
 
 function handleResize({camera, renderer}) {
@@ -129,5 +192,4 @@ function handleResize({camera, renderer}) {
 
 init();
 
-const resizeHOF = ({camera, renderer}) => (event) => handleResize({camera, renderer});
-window.addEventListener("resize", resizeHOF({camera, renderer}), false);
+
