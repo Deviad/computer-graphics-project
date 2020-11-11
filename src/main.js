@@ -2,7 +2,18 @@ import './styles.css';
 
 import THREE from "three.js";
 import dat from "dat.gui";
-import Rx, {Observable, Scheduler, defer, from, of, interval, zip, forkJoin} from "rxjs";
+import Rx, {
+	Observable,
+	Scheduler,
+	defer,
+	from,
+	of,
+	interval,
+	zip,
+	forkJoin,
+	animationFrameScheduler,
+	timer
+} from "rxjs";
 import {
 	switchMap,
 	map,
@@ -14,7 +25,7 @@ import {
 	tap,
 	takeUntil,
 	mapTo,
-	mergeMap, delay
+	mergeMap, delay, subscribeOn
 } from 'rxjs/operators';
 
 // scalar to simulate speed
@@ -228,7 +239,6 @@ function render({scene, renderer, camera, raycaster, selected, mouse}) {
 
 	scene.getObjectByName("cube").material.opacity = control.opacity;
 	scene.getObjectByName("cube").material.color = new THREE.Color(control.color);
-	move();
 	requestAnimationFrame(() => render({scene, renderer, camera, raycaster, selected, mouse}));
 
 	raycaster.setFromCamera(mouse, camera);
@@ -273,13 +283,29 @@ function handleResize({camera, renderer}) {
 function move() {
 	console.log("testttttttt");
 	var vector = direction.clone().multiplyScalar(speed);
-			for (const s of spheres) {
-				s.position.x = s.position.x + vector.x;
-				s.position.y = s.position.y + vector.y;
-				s.position.z = s.position.z + vector.z;
-			}
+/*
+	Using RXJS is not mandatory, I could just put move() inside render() before
+	requestAnimationFrame().
+	This is just to show how RXJS can be used to create animations.
+
+ */
+	interval(0, animationFrameScheduler)
+		.pipe(
+			// map(frame=>Math.sin(frame/10)*50),
+			takeUntil(timer(600)),
+			tap(y=> {
+				console.log("y is:", y);
+				for (const s of spheres) {
+					s.position.x = s.position.x + vector.x;
+					s.position.y = s.position.y + vector.y;
+					s.position.z = s.position.z + vector.z;
+				}
+			})
+			).subscribe();
+
 	speed = EasingFunctions.linear(speed);
 }
 init();
+move();
 
 
