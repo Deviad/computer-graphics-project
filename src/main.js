@@ -11,53 +11,69 @@ const direction = new THREE.Vector3(0, -1, 0);
 const EasingFunctions = {
     // no easing, no acceleration
     linear: t => t,
-    // accelerating from zero velocity
-    easeInQuad: t => t * t,
-    // decelerating to zero velocity
-    easeOutQuad: t => t * (2 - t),
-    // acceleration until halfway, then deceleration
-    easeInOutQuad: t => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
-    // accelerating from zero velocity
-    easeInCubic: t => t * t * t,
-    // decelerating to zero velocity
-    easeOutCubic: t => --t * t * t + 1,
-    // acceleration until halfway, then deceleration
-    easeInOutCubic: t =>
-        t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
-    // accelerating from zero velocity
-    easeInQuart: t => t * t * t * t,
-    // decelerating to zero velocity
-    easeOutQuart: t => 1 - --t * t * t * t,
-    // acceleration until halfway, then deceleration
-    easeInOutQuart: t => (t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t),
-    // accelerating from zero velocity
-    easeInQuint: t => t * t * t * t * t,
-    // decelerating to zero velocity
-    easeOutQuint: t => 1 + --t * t * t * t * t,
-    // acceleration until halfway, then deceleration
-    easeInOutQuint: t =>
-        t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t
 };
 
 function initState() {
+
     /*
-    Object literals are singletons.
-    By calling initState() we can create different instances of this object.
-  */
+        Object literals, adica obiecte instantiate direct in codul sursa, sunt pentru definitie
+        de obiect literal singleton.
+        InitState este o fabrica de obiecte care genereaza starea initiala a aplicatiei
+
+     */
+
 
     return {
+        /*
+          O scena este un grup de elemente diferite care sunt parte a lumi pe care dorim sa reprezentam.
+          Elementele sunt obiecte 3d, camera, punctele de lumina, sunetele, efectele speciale de exemplu ciata.
+         */
         scene: new THREE.Scene(),
+
+
+        /*
+            O camera (de filmat) reprezenta ochi prin care privim lumea. O scena contine diferite camere, totusi doar
+            o singura camere poate fi activa in un timp anume.
+            PerspectiveCamera este o camera care foloseste o proiectia perspectiva.
+         */
+
         camera: new THREE.PerspectiveCamera(
             45,
             window.innerWidth / window.innerHeight,
             0.1,
             1000
         ),
+
+
+        /*
+            Renderer este o functie care creaza un element din DOM astfel in cat poate fi adaugat unei pagini web.
+            Acest rendereer poate folosi WEBGL, canvas, CSS3.
+         */
+
         renderer: new THREE.WebGLRenderer(),
+
+        /*
+            Mesh sunt obiectele 3D care pot fi adaugati unei scenei.
+            Aceste obiecte sunt facute de niste geometrii (forme) si de materiale.
+            Materiale sunt facute de coloare, textura si efectele de lumina.
+         */
+
+
+        /*
+            Aici creez planul unde roteaza cubul.
+         */
+
         plane: new THREE.Mesh(
             new THREE.PlaneGeometry(20, 20),
             new THREE.MeshLambertMaterial({ color: 0xcccccc })
         ),
+
+        /*
+            Aici specific detalile pentru a genera Cubul.
+            BoxGeometry reprezinta o clasa de geometrie pentru crearea o forma care arata ca un cub
+            rectangular cu latime, inaltime si profunzime.
+         */
+
         cube: new THREE.Mesh(
             new THREE.BoxGeometry(6, 4, 6),
             new THREE.MeshLambertMaterial({
@@ -67,14 +83,53 @@ function initState() {
                 map: new THREE.TextureLoader().load(marble),
             })
         ),
+
+        /*
+            E un tip de lumina uniforme care ilumineza scena in fel uniform.
+            Acesta lumina nu poate fi folosita pentru a desemna umbrele fiindca nu are o directie.
+         */
+
         ambient: new THREE.AmbientLight(0xffffff, 0.3),
-        light: new THREE.DirectionalLight(0xffffff, 1, 100, 2),
+
+        /*
+            E un tip de lumina care se duce catre o specifica directie si poate crea umbre.
+         */
+
+        light: new THREE.DirectionalLight(0xffffff, 1),
+
+
+        /*
+
+        Clock este folosit pentru a urmari timpul si se bazeza pe functie furnizata din browser performance.now.
+        In cazul in care este folosit un browser mai vec, foloseste Date.now.
+        */
+
         clock: new THREE.Clock(),
+
+        /*
+            Acest obiect contine parametri initiali folositi de utilitate DAT (in partea drapta superioare a ecranului)
+            pentru a schimba in timp real culoarile, etc a unui obiect.
+         */
+
         control: {
             rotationSpeed: 0.5,
             opacity: 1,
             color: 0xbdbdbd
         },
+
+        // raycaster "translates" the x,y coordinates of the mouse on the plane surface into 3D coordinates (x,y,z),
+        // taking into account those that are the visible parts of objects on the scene.
+        // It excludes the hidden portions of objects.
+
+        /*
+            Raycaster este capabil sa convertesca coordonatele mouse-ului pe superfata plana in coordonatele 3D (x,y,z),
+            avand in considerare cele parti care sunt visibile a obiectelor pe scena si stie sa excluda portile ascunse
+            a obiectelor.
+
+            Raycaster ne permite sa selectam cu pointer-ul mouse-ului partile obiectelor la vedere.
+
+         */
+
         raycaster: new THREE.Raycaster(),
         selected: undefined,
         mouse: new THREE.Vector2(), //Vector2 it's used do represent a couple of coordinates on a 2D plane.
@@ -84,6 +139,16 @@ function initState() {
 }
 
 const state = initState();
+
+/*
+Aici folosesc o functionalitate din ES6 care se numeste object destructuring care mi permite de a decompune un obiect
+    in componentele din care este facut astfel in cat sunt pregatite pentru a fi folosite in cod.
+
+
+    in loc de a folosi state.scene, in acest fel pot folosi direct scene mai departe.
+
+ */
+
 const {
     scene,
     camera,
@@ -99,6 +164,21 @@ const {
     raycaster,
     mouse
 } = state;
+
+
+/*
+ Astea sunt functile care contin codul folosit din ascultatoari de evenimente curespunzatoare.
+ Acesti ascultatori sunt oferiti din dom si ne permit sa executam niste actiuni in momentul in care se verifica un event.
+ Ascultatori de evenimente sunt atasati din dezvoltatorul pe elementele dorite din DOM.
+ Un event trece prin 3 faze:
+
+ - Event capturing: faza in care un eveniment ste capturat dar inca nu a ajuns la target.
+ - Event target: eveniment a juns la target.
+ - Event bubbling: evenimentul sare prin lansul de elementele a DOM-ului si in acesta faza poate fi capturat si din
+ elementele care reprezinta copiilor a elementului pe care ascultatorul a fost plasat.
+
+
+ */
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -121,10 +201,10 @@ function onDocumentMouseDown(event) {
 }
 
 /*
- We need to specify where in the website we want to draw our composition.
- For this purpose we can use "renders", which are responsible for creating
- the DOM element (WebGL, Canvas, CSS3) so that we can add it on the page.
-*/
+    Renderer este o functie care creaza un element din DOM astfel in cat poate fi adaugat unei pagini web.
+    Acest rendereer poate folosi WEBGL, canvas, CSS3.
+ */
+
 function buildRenderer() {
     renderer.setClearColor(0x000000, 1.0);
     renderer.physicallyCorrectLights = true;
@@ -167,6 +247,13 @@ function init() {
     buildLight();
     buildCamera();
 
+
+    /*
+    ...Array(4) este o scurtatura prin care folosind un numar in constructor de Array, putem genera un array de 4 elemente
+        care o sa aiba valoare "undefined".
+
+     */
+
     [...Array(4).keys()].forEach(x => {
         const geometry = new THREE.DodecahedronGeometry(2, 0);
         const material = new THREE.MeshLambertMaterial({ color: 0x3483f, map: new THREE.TextureLoader().load(marble)});
@@ -176,6 +263,11 @@ function init() {
 
         spheres.push(sphere);
     });
+
+
+    /*
+        Aici adaug pe scena 4 obiectele cu forma de dodecaedro (care pe ecran arata aproape ca o sfera)
+     */
 
     spheres.forEach(x => {
         console.log("SPHERE IS", x);
@@ -194,6 +286,25 @@ function init() {
     container.appendChild(renderer.domElement);
     const resizeHOF = ({ camera, renderer }) => event =>
         handleResize({ camera, renderer });
+
+    /*
+        Aici folosesc o asa numita Higher Order Function, adica o functie de ordin superior: aceste idee se lega de partial
+        evaluation si ne ajuta sa micsoram numarul de parametrelor care primeste o functie.
+        De fapt, browser-ul se astepta o functie de callback in care singur parametru va fi evenimentul.
+        Ex.:
+        function(event) {
+            console.log(event);
+        }
+        Totusi, noi avem nevoie sa iniectam parametri da care noi avem nevoie la randul nostru.
+        Atunci partial computation vine in ajutorul nostru.
+        Norocul este ca Javascript foloseste scope-ul lexical adica o variabila declarate intre o functie parinte
+        este vizibila in interiorul unei functi imbricata.
+
+
+     */
+    /*
+        Resize se refera la redimensionarea obiectului Window.
+     */
     window.addEventListener("resize", resizeHOF({ camera, renderer }), false);
     document.addEventListener("mousemove", onDocumentMouseMove, false);
     container.addEventListener("mousedown", onDocumentMouseDown, false);
@@ -273,11 +384,18 @@ function move() {
     console.log("testttttttt");
     const vector = direction.clone().multiplyScalar(speed);
     /*
-      Using RXJS is not mandatory, I could just put move() inside render() before
-      requestAnimationFrame().
-      This is just to show how RXJS can be used to create animations.
+
+    Folosirea lui RXJS nu este obligatorie in cazul specific totusi am vrut sa il folosesc
+    pentru ca observabile sunt des intalnite.
+
+    Un Scheduler este o structura de date pentru a memora si a pune in unei cozi taskurile pe baza unei prioritati sau alte
+    criterile. Un scheduler are un ceas virtual si poate obtine timpul prin metoda now().
+
+    AnimationFrameScheduler programeaza o sarcina (task) astfel in cat sa se intample inainte de a desena continutul din nou pe ecran.
+
 
    */
+
     interval(0, animationFrameScheduler)
         .pipe(
             // map(frame=>Math.sin(frame/10)*50),
