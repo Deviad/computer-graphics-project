@@ -57,6 +57,7 @@ function initState() {
             1000
         ),
 
+
         /*
             Renderer este o functie care creaza un element din DOM astfel in cat poate fi adaugat unei pagini web.
             Acest rendereer poate folosi WEBGL, canvas, CSS3.
