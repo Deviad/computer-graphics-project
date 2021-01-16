@@ -317,12 +317,6 @@ function init() {
 
     scene.add(plane);
     scene.add(cube);
-
-    /*
-        Roteaza camera astfel in cat sa se uite intr-o anumita directie.
-        In cazul specific camera se va uita in directia scenei.
-    */
-
     camera.lookAt(scene.position);
     scene.add(ambient);
     scene.add(light);
@@ -438,7 +432,7 @@ function handleResize({camera, renderer}) {
     camera.aspect = window.innerWidth / window.innerHeight;
 
     /*
-        Matricea de proiecție pentru a transforma coordonatele de vizualizare (view space) în coordonatele clipului (clip space) ia de obicei
+        Matricea de proiecție pentru a transforma coordonatele de vizualizare în coordonatele clipului ia de obicei
         două forme diferite în care fiecare formă își definește propriul frustum unic.
         Frustrum este trunchiul unei forme geometrice solide.
         Putem crea fie o matrice de proiecție ortografică, fie o matrice de proiecție în perspectivă.
