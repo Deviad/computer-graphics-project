@@ -188,8 +188,34 @@ function buildPlane() {
 
      -0.5 x 3.14 * 57.3 grade = 90 grade
 
+     Translatie
+
+      [ x' ]   [ 1   0        0        Tx ]     [  x ]
+      | y' | = | 0   1        0        Ty |  x  |  y ]
+      | z' |   | 0   1        1        Tz |     |  z ]
+      [ 1' ]   [ 0   0        0        1 ]      [  1 ]
+
+      x' = x + Tx
+      y' = y + Ty
+      z; = z + Tz
+
+      Rotatie
+
+      Dacă vrem să rotim o figură în jurul axei x, atunci componenta x va remane
+      la fel, si o sa aplicam niste formule trigonometrice pe componentele y si z
+      care vin de la unghiurile lui Euler.
+
+      Scalare
+
+      Multim fiecare componenta x, y, z cu un scalar.
+
+      x' = Sx * x;
+      y' = Sy * y;
+      z' = Sz * z;
+
+
      */
-    plane.rotation.x = -0.5 * Math.PI;
+    plane.rotateX(-0.5 * Math.PI);
     plane.position.x = 0;
     plane.position.y = -2;
     plane.position.z = 0;
@@ -252,8 +278,9 @@ function init() {
                 O unitate de textură efectuează procesarea pentru maparea texturilor.
                 Un obiect de textură stochează datele necesare pentru maparea texturilor.
                 Împreună, o unitate de textură și un obiect de textură pot efectua maparea texturilor într-un shader.
-                Puteți crea oricâte obiecte de textură doriți, dar numărul de unități de textură din GPU determină câte mape de
-                textură puteți utiliza simultan într-un shader.
+                Putem crea oricâte obiecte de textură dorim, dar numărul de unități de textură din unitate de procesare grafica
+                determină câte mape de textură putem utiliza simultan într-un shader.
+                Coordonatele de textura se afla in intervalul 0 si 1.
             */
             map: new THREE.TextureLoader().load(marble)
         });
@@ -435,7 +462,7 @@ function move() {
 
     interval(0, animationFrameScheduler)
         .pipe(
-            takeUntil(timer(1000)),
+            takeUntil(timer(700)),
             tap(y => {
                 console.log("y is:", y);
                 for (const s of spheres) {
