@@ -396,15 +396,44 @@ function addControlGui(controlObject) {
 }
 
 
+// let time = performance.now();
+
 function render({scene, renderer, camera}) {
 
     scene.getObjectByName("cube").material.color = new THREE.Color(control.color);
+
+    /*
+        Este o alternativa mai eficienta in loc de
+        setInterval(function() {
+            // animiate something
+        }, 1000/60);
+
+        Unu intre avantaje este ca animatia se opreste cand schimbam tab in browser.
+
+        A fost introdus recent intre functile din api-ul browserului.
+
+     */
+
     requestAnimationFrame(() =>
         render({scene, renderer, camera})
     );
 
 
+
+    // console.log(performance.now() - time)
+    //
+    // if(Math.floor(performance.now() - time) <=1500) {
+    //     const vector = direction.clone().multiplyScalar(speed);
+    //     for (const s of spheres) {
+    //         s.position.x = s.position.x + vector.x;
+    //         s.position.y = s.position.y + vector.y;
+    //         s.position.z = s.position.z + vector.z;
+    //     }
+    // }
+
+
     renderer.render(scene, camera);
+
 }
 
 function handleResize({camera, renderer}) {
@@ -467,7 +496,7 @@ function move() {
                 console.log("y is:", y);
                 for (const s of spheres) {
                     s.position.x = s.position.x + vector.x;
-                    s.position.y = s.position.y + vector.y;
+                    s.position.y = s.position.y + vector.y;  // vector.y = -1 * 0.05 (speed)
                     s.position.z = s.position.z + vector.z;
                 }
             })
