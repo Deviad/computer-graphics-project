@@ -315,7 +315,7 @@ function init() {
        Functile primesc radians.
     */
 
-    cube.rotateZ(-20);
+    cube.rotateZ(-0.25 * Math.PI);
 
     scene.add(plane);
     scene.add(cube);
