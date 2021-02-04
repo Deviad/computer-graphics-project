@@ -483,7 +483,7 @@ function move() {
 
     interval(0, animationFrameScheduler)
         .pipe(
-            takeUntil(timer(3000)),
+            takeUntil(timer(1400)),
             tap(y => {
                 console.log("y is:", y);
                 for (const s of spheres) {
