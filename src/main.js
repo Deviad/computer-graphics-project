@@ -489,15 +489,29 @@ function move() {
          https://github.com/ReactiveX/rxjs/blob/master/src/internal/util/pipe.ts
      */
 
+
+    const colors = [0x000000, 0xa94949, 0x49a97b, 0xfBf904, 0x0406fb ];
+    let counter = 0;
+
     interval(0, animationFrameScheduler)
         .pipe(
-            takeUntil(timer(1400)),
+            takeUntil(timer(2000)),
             tap(y => {
                 console.log("y is:", y);
                 for (const s of spheres) {
                     s.position.x = s.position.x + vector.x;
                     s.position.y = s.position.y + vector.y;  // vector.y = -1 * 0.05 (speed)
                     s.position.z = s.position.z + vector.z;
+                }
+
+                if(Math.trunc(spheres[0].position.y ) % 2 === 0) {
+                    spheres[0].material.color.set(colors[counter]);
+                    spheres[1].material.color.set(colors[counter]);
+                    spheres[2].material.color.set(colors[counter]);
+                    counter = counter + 1;
+                    if (counter > 4) {
+                        counter = 0;
+                    }
                 }
             })
         )
